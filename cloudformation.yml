@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Document Archive that is compatible with BSI TR03138
+Resources:
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - BucketKeyEnabled: true
+            ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256       
+      IntelligentTieringConfigurations:
+        - Id: Archive
+          Status: Enabled
+          Tierings:
+            - AccessTier: ARCHIVE_ACCESS
+              Days: 365
+      LifecycleConfiguration:
+        Rules:
+          - Id: Delete
+            Status: Enabled
+            ExpirationInDays: 1
+      LoggingConfiguration:
+        LogFilePrefix: logs
+      ObjectLockConfiguration:
+        ObjectLockEnabled: Enabled
+        Rule:
+          DefaultRetention:
+            # Years: 10
+            Days: 1
+            Mode: COMPLIANCE # see https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock-overview.html#object-lock-retention-modes 
+      ObjectLockEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+Outputs:
+  Bucket:
+    Description: Name of the S3 Bucket
+    Value:
+      Ref: Bucket
+
