@@ -6,8 +6,8 @@ IFS="$(printf '\n\t')"
 for file in documents/* ; do
   if [ -e "$file" ] ; then
 
-    key=$(stat -f "%Sc/%N" -t "%Y/%m/%d" $file)
-
+    key=$(stat -f "%Sc/%N" -t "%Y/%m/%d" $file | sed 's/documents\///')
+    
     md=$(sha2 -256 -q $file)
     sig=$(echo $md | xxd -r -p | base64)
 
