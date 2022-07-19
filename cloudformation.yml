@@ -21,8 +21,6 @@ Resources:
           - Id: Delete
             Status: Enabled
             ExpirationInDays: 1
-      LoggingConfiguration:
-        LogFilePrefix: logs
       ObjectLockConfiguration:
         ObjectLockEnabled: Enabled
         Rule:
@@ -38,6 +36,68 @@ Resources:
         RestrictPublicBuckets: true
       VersioningConfiguration:
         Status: Enabled
+  Logs:
+    Type: AWS::S3::Bucket
+    Properties: 
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - BucketKeyEnabled: true
+            ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256       
+      BucketName: !Sub "${Bucket}-logs"
+      IntelligentTieringConfigurations:
+        - Id: Archive
+          Status: Enabled
+          Tierings:
+            - AccessTier: ARCHIVE_ACCESS
+              Days: 365
+      LifecycleConfiguration:
+        Rules:
+          - Id: Delete
+            Status: Enabled
+            ExpirationInDays: 3650
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+  Policy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref Logs
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action: "s3:GetBucketAcl"
+          Principal:
+            Service: "cloudtrail.amazonaws.com"
+          Resource: !Sub "arn:aws:s3:::${Logs}"
+        - Effect: Allow
+          Action: "s3:PutObject"
+          Condition:
+            StringEquals:
+              "s3:x-amz-acl": "bucket-owner-full-control"
+          Principal:
+            Service: "cloudtrail.amazonaws.com"
+          Resource: !Sub "arn:aws:s3:::${Logs}/AWSLogs/${AWS::AccountId}/*"
+  Trail:
+    Type: "AWS::CloudTrail::Trail"
+    DependsOn:
+      - Policy
+    Properties:
+      EnableLogFileValidation: true
+      EventSelectors:
+        - DataResources:
+            - Type: "AWS::S3::Object"
+              Values:
+                - !Sub "${Bucket.Arn}/"
+          IncludeManagementEvents: false
+          ReadWriteType: All
+      IsLogging: true
+      S3BucketName: !Ref Logs
+
 Outputs:
   Bucket:
     Description: Name of the S3 Bucket
