@@ -21,6 +21,8 @@ Resources:
           - Id: Delete
             Status: Enabled
             ExpirationInDays: 1
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 1
       ObjectLockConfiguration:
         ObjectLockEnabled: Enabled
         Rule:
