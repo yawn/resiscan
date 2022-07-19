@@ -1,5 +1,5 @@
 #!/bin/bash
-BUCKET=documentarchive-bucket-1n7u7bw0n6asg
+BUCKET=$(aws cloudformation describe-stacks --stack-name DocumentArchive --query "Stacks[0].Outputs[?OutputKey == 'Bucket'].OutputValue" --output text) || exit 128
 
 IFS="$(printf '\n\t')"
 
@@ -7,7 +7,6 @@ for file in documents/* ; do
   if [ -e "$file" ] ; then
 
     key=$(stat -f "%Sc/%N" -t "%Y/%m/%d" $file | sed 's/documents\///')
-    
     md=$(sha2 -256 -q $file)
     sig=$(echo $md | xxd -r -p | base64)
 
