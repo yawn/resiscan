@@ -20,16 +20,15 @@ Resources:
         Rules:
           - Id: Delete
             Status: Enabled
-            ExpirationInDays: 1
+            ExpirationInDays: 4015
             NoncurrentVersionExpiration:
-              NoncurrentDays: 1
+              NoncurrentDays: 4015
       ObjectLockConfiguration:
         ObjectLockEnabled: Enabled
         Rule:
           DefaultRetention:
-            # Years: 10
-            Days: 1
-            Mode: COMPLIANCE # see https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock-overview.html#object-lock-retention-modes 
+            Years: 11
+            Mode: GOVERNANCE # see https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock-overview.html#object-lock-retention-modes 
       ObjectLockEnabled: true
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
@@ -58,7 +57,7 @@ Resources:
         Rules:
           - Id: Delete
             Status: Enabled
-            ExpirationInDays: 3650
+            ExpirationInDays: 4015
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -105,4 +104,7 @@ Outputs:
     Description: Name of the S3 Bucket
     Value:
       Ref: Bucket
-
+  Trail:
+    Description: CloudTrail ARN of document archive access logs (e.g. for validation)
+    Value:
+      Ref: Trail
