@@ -22,7 +22,10 @@ for file in documents/* ; do
     fi
 
     echo -n "Uploading $file with SHA2 $md: $sig -> "  
-    aws --no-cli-pager s3api put-object --bucket $BUCKET --body $file --checksum-sha256 $sig --key $key --query ChecksumSHA256 --output text 
+
+    type=$(file --brief --mime-type $file)
+
+    aws --no-cli-pager s3api put-object --bucket $BUCKET --body $file --checksum-sha256 $sig --content-type $type --key $key --query ChecksumSHA256 --output text 
 
   fi
 done
